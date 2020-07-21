@@ -40,13 +40,17 @@ namespace RofiWindows
                 if (hWnd == shellWindow) return true;
                 if (!IsWindowVisible(hWnd)) return true;
 
+                DwmGetWindowAttribute(hWnd, DWMWINDOWATTRIBUTE.Cloaked, out bool cloaked, Marshal.SizeOf(typeof(bool)));
+                if (cloaked) return true;
+
                 int length = GetWindowTextLength(hWnd);
                 if (length == 0) return true;
 
                 StringBuilder builder = new StringBuilder(length);
                 GetWindowText(hWnd, builder, length + 1);
 
-                windows[hWnd] = builder.ToString();
+                string title = builder.ToString();
+                windows[hWnd] = title;
                 return true;
 
             }, 0);
@@ -55,6 +59,9 @@ namespace RofiWindows
         }
 
         private delegate bool EnumWindowsProc(HWND hWnd, int lParam);
+
+        [DllImport("dwmapi.dll")]
+        static extern int DwmGetWindowAttribute(HWND hwnd, DWMWINDOWATTRIBUTE dwAttribute, out bool pvAttribute, int cbAttribute);
 
         [DllImport("USER32.DLL")]
         private static extern bool EnumWindows(EnumWindowsProc enumFunc, int lParam);
@@ -73,6 +80,55 @@ namespace RofiWindows
 
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(HWND hWnd);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetWindowRect(HWND hWnd, out RECT lpRect);
+
+        [DllImport("User32", CharSet = CharSet.Unicode)]
+        static extern bool GetWindowInfo(HWND hwnd, out WINDOWINFO pwi);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;        // x position of upper-left corner
+            public int Top;         // y position of upper-left corner
+            public int Right;       // x position of lower-right corner
+            public int Bottom;      // y position of lower-right corner
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct WINDOWINFO
+        {
+            public int cbSize;
+            public RECT rcWindow;
+            public RECT rcClient;
+            public int dwStyle;
+            public int dwExStyle;
+            public int dwWindowStatus;
+            public uint cxWindowBorders;
+            public uint cyWindowBorders;
+            public IntPtr atomWindowType;
+            public int wCreatorVersion;
+        }
+        enum DWMWINDOWATTRIBUTE : uint
+        {
+            NCRenderingEnabled = 1,
+            NCRenderingPolicy,
+            TransitionsForceDisabled,
+            AllowNCPaint,
+            CaptionButtonBounds,
+            NonClientRtlLayout,
+            ForceIconicRepresentation,
+            Flip3DPolicy,
+            ExtendedFrameBounds,
+            HasIconicBitmap,
+            DisallowPeek,
+            ExcludedFromPeek,
+            Cloak,
+            Cloaked,
+            FreezeRepresentation
+        }
     }
 
     public static class WindowExtensions
