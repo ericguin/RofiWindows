@@ -23,6 +23,28 @@ namespace RofiWindows
         public MainWindow()
         {
             InitializeComponent();
+            FilterTextBox.Focus();
+            ItemsGrid.ItemsSource = Window.ListWindows();
+        }
+
+        private void FilterChanged(object sender, TextChangedEventArgs e)
+        {
+            ItemsGrid.ItemsSource = Window.ListWindows().FilterWindowsByTitleFuzzy(FilterTextBox.Text);
+        }
+
+        private void FilterKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (ItemsGrid.Items.Count > 0)
+                {
+                    if (ItemsGrid.Items[0] is Window w)
+                    {
+                        w.Activate();
+                        Close();
+                    }
+                }
+            }
         }
     }
 }

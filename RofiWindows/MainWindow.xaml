@@ -5,8 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RofiWindows"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="450" Width="800" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterScreen" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" Margin="4px" Name="FilterTextBox" TextChanged="FilterChanged" KeyDown="FilterKeyDown"/>
+        <DataGrid Grid.Row="1" Margin="4px" Name="ItemsGrid" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="PID" Width="Auto" Binding="{Binding Handle}"/>
+                <DataGridTextColumn Header="Title" Width="*" Binding="{Binding Title}"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>

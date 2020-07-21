@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FuzzySharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,7 +22,9 @@ namespace RofiWindows
             Title = title;
         }
 
-        public IEnumerable<Window> ListWindows() =>
+        public void Activate() => SetForegroundWindow(Handle);
+
+        public static IEnumerable<Window> ListWindows() =>
             GetOpenWindows().Select(_ => new Window(_.Key, _.Value));
 
         // https://stackoverflow.com/a/43640787
@@ -67,11 +70,14 @@ namespace RofiWindows
 
         [DllImport("USER32.DLL")]
         private static extern IntPtr GetShellWindow();
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(HWND hWnd);
     }
 
     public static class WindowExtensions
     {
         public static IEnumerable<Window> FilterWindowsByTitleFuzzy(this IEnumerable<Window> windows, string filter) =>
-
+            Process.ExtractTop(filter, windows.Select(_ => _.Title)).Join(windows, res => res.Value, win => win.Title, (res, win) => new { w = win, r = res }).OrderByDescending(_ => _.r.Score).Select(_ => _.w);
     }
 }
