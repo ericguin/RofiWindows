@@ -45,6 +45,10 @@ namespace RofiWindows
                     }
                 }
             }
+            else if (e.Key == Key.Escape)
+            {
+                Close();
+            }
         }
     }
 }
